@@ -1,0 +1,27 @@
+{
+  "name": "12-employeetracker-aj",
+  "version": "1.0.0",
+  "description": "Module 12 employee tracker challenge by Adrian Jimenez",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PuppetAJ/12-EmployeeTracker-AJ.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PuppetAJ/12-EmployeeTracker-AJ/issues"
+  },
+  "homepage": "https://github.com/PuppetAJ/12-EmployeeTracker-AJ#readme",
+  "dependencies": {
+    "ascii-art": "^2.8.5",
+    "console.table": "^0.10.0",
+    "inquirer": "^8.2.4",
+    "mysql2": "^2.3.3"
+  }
+}
