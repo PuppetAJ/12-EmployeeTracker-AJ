@@ -13,25 +13,49 @@ class DB {
     addEmployee(firstName, lastName, role, manager) {
         return this.connection.promise().query(
             `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`, [firstName, lastName, role, manager]
-        )
+        );
+    }
+
+    updateEmployee(employeeID, roleID) {
+        return this.connection.promise().query(
+            `UPDATE employee SET role_id = ? WHERE id = ?`, [roleID, employeeID]
+        );
+    }
+    
+    findAllManagers() {
+        return this.connection.promise().query(
+            `SELECT * FROM employee WHERE manager_id IS NULL`
+        );
+    }
+
+    findAllRolesRaw() {
+        return this.connection.promise().query(
+            `SELECT * FROM role`
+        );
     }
 
     findAllRoles() {
         return this.connection.promise().query(
-            `SELECT * FROM role`
+            `SELECT role.id, role.title, department.name AS department, role.salary FROM role LEFT JOIN department ON role.department_id = department.id`
         )
     }
 
-    findAllManagers() {
+    addRole(title, salary, department) {
         return this.connection.promise().query(
-            `SELECT * FROM employee WHERE manager_id IS NULL`
+            `INSERT INTO role (title, salary, department_id) VALUES (?,?,?)`, [title, salary, department]
+        )
+    }
+
+    addDepartment(name) {
+        return this.connection.promise().query(
+            `INSERT INTO department (name) VALUES (?)`, [name]
         )
     }
 
     findAllDepartments() {
         return this.connection.promise().query(
             `SELECT * FROM department`
-        )
+        );
     }
   
 }
