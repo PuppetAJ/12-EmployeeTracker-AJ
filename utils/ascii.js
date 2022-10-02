@@ -1,3 +1,4 @@
+// variable containing ascii art
 const ascii = 
 `
 =======================================================
@@ -23,8 +24,10 @@ const ascii =
 
 `
 
+// function for logging ascii art variable
 const displayASCII = () => {
     console.log(ascii);
 }
 
+// exports function
 module.exports = displayASCII;

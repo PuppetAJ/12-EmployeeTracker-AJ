@@ -1,18 +1,24 @@
+// imports modules and functions from other files
 const inquirer = require ('inquirer');
 const connection = require('./db/connection');
 const DB = require ('./utils/db');
 const ascii = require ('./utils/ascii');
 const cTable = require('console.table');
 
+// creates a new db instance passing the connection into its constructor, allowing us to use connection in our methods
 const db = new DB(connection);
 
+// array declarations
 let employeeArr = [];
 let rolesArr = [];
 let departmentsArr = [];
 let managerArr = [{value: null, name: 'No manager'}];
 
+// function containing initial prompt logic
 const promptUser = () => {
+    // calls updateArrays function to make sure arrays update while user selects what to do
     updateArrays();
+    // returns inquirer prompt
     return inquirer.prompt([
         {
             type: 'list',
@@ -37,12 +43,15 @@ const promptUser = () => {
             ]
         },
     ]).then((data) => {
+        // sends the selected value to checkNav function
         checkNav(data.nav);
-    })
+    });
 };
 
+// function containing logic to add employees to database
 const addEmployee = () => {
 
+    // inquirer prompts for user input, with validation to prevent semicolons and occasionally spaces from being included
     return inquirer.prompt([
         {
             type: 'input',
@@ -97,24 +106,31 @@ const addEmployee = () => {
             choices: managerArr
         }
     ]).then((data) => {
+        // destructures data object
         const { employeeFirstName, employeeLastName, employeeRole, employeeManager } = data;
+        // executed addEmployee method using the destructured data
         db.addEmployee( employeeFirstName, employeeLastName, employeeRole, employeeManager)
             .then(() => {
+                // logs messages when complete, and prompts user again
                 console.log(`
                 `);
                 console.log('Employee added to database');
                 console.log(`
                 `);
                 promptUser();
-            })
-    })
-}
+            });
+    });
+};
 
+// function containing logic to view employees by manager
 const viewByManager = () => {
 
+    // creates new array from the manager array
     const newManagerArr = managerArr.slice();
+    // removes first entry (no manager) since we can't add no manager
     newManagerArr.shift();
 
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'list',
@@ -124,20 +140,25 @@ const viewByManager = () => {
         }
     ])
     .then((data) => {
+        // calls method from db class
         db.findAllEmployeesByManager(data.managerID)
             .then(([rows, fields]) => {
+                // logs data as table once complete
                 console.log(`
                 `);
                 console.table(rows);
                 console.log(`
                 `);
+                // prompts user again
                 promptUser();
-            })
-    })
-}
+            });
+    });
+};
 
+// function containing logic to view employees by department
 const viewByDepartment = () => {
     
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'list',
@@ -147,20 +168,25 @@ const viewByDepartment = () => {
         }
     ])
     .then((data) => {
+        // calls method from db class
         db.findAllEmployeesByDepartment(data.departmentID)
             .then(([rows, fields]) => {
+                // logs data into table
                 console.log(`
                 `);
                 console.table(rows);
                 console.log(`
                 `);
+                // prompts user again
                 promptUser();
-            })
-    })
-}
+            });
+    });
+};
 
+// function containing logic to update an employee's role
 const updateRole = () => {
 
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'list',
@@ -176,22 +202,26 @@ const updateRole = () => {
         }
     ])
     .then((data) => {
-        console.log(data);
+        // calls method from db constructor
         db.updateEmployee(data.employeeID, data.roleID)
             .then(() => {
+                // logs message once method is done
                 console.log(`
                 `);
                 console.log("Role updated in database");
                 console.log(`
                 `);
+                // prompts user again
                 promptUser();
-            })
+            });
 
-    })
-}
+    });
+};
 
+// function containing logic to update an employee's manager
 const updateManager = () => {
 
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'list',
@@ -207,23 +237,30 @@ const updateManager = () => {
         }
     ])
     .then((data) => {
+        // calls method from db class
         db.updateManager(data.employeeID, data.managerID)
             .then(() => {
+                // logs message once method is complete
                 console.log(`
                 `);
                 console.log('Employee\'s manager updated in database');
                 console.log(`
                 `);
+                // prompts user again
                 promptUser();
             });
     });
 };
 
+// function containing logic for deleting an employee from the database
 const deleteEmployee = () => {
 
+    // creates new array from employeeArr
     const newEmployeeArr = employeeArr.slice();
+    // adds a "none" option to the array for user input
     newEmployeeArr.unshift({value: null, name: 'None'});
 
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'list',
@@ -233,18 +270,24 @@ const deleteEmployee = () => {
         }
     ])
     .then((data) => {
+        // executes delete method from db class
         db.deleteEmployee(data.employeeID)
             .then(() => {
+                // checks if the value is anything other than null
                 if (data.employeeID != null) {
+                    // if so, logs message
                     console.log('Employee removed from database');
                 }
+                // prompts user again
                 promptUser();
-            })
-    })
-}
+            });
+    });
+};
 
+// function containing logic for adding a role to the database
 const addRole = () => {
 
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'input',
@@ -285,24 +328,32 @@ const addRole = () => {
             choices: departmentsArr
         }
     ]).then((data) => {
-       const { roleName, roleSalary, roleDepartment } = data;
-       db.addRole(roleName, roleSalary, roleDepartment)
+        // destructures data object
+        const { roleName, roleSalary, roleDepartment } = data;
+        // uses destructured data to execute addRole method from db class
+        db.addRole(roleName, roleSalary, roleDepartment)
             .then(() => {
+                // logs messages once method is complete
                 console.log(`
                 `);
                 console.log('Role added to database');
                 console.log(`
                 `);
+                // prompts user again
                 promptUser();
-            })
-    })
-}
+            });
+    });
+};
 
+// function containing logic for deleting a role from the database
 const deleteRole = () => {
 
+    // creates a new array from rolesArr
     const newRolesArr = rolesArr.slice();
+    // adds none option for user input
     newRolesArr.unshift({value: null, name: 'None'});
 
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'list',
@@ -312,18 +363,24 @@ const deleteRole = () => {
         }
     ])
     .then((data) => {
+        // executes deleteRole method from db class
         db.deleteRole(data.roleID)
             .then(() => {
+                // checks if id value is anything other than null
                 if (data.roleID != null) {
+                    // executes message if above is true
                     console.log('Role removed from database');
                 }
+                // prompts user again
                 promptUser();
-            })
-    })
-}
+            });
+    });
+};
 
+// function containing logic for adding a department to the database
 const addDepartment = () => {
 
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'input',
@@ -346,23 +403,30 @@ const addDepartment = () => {
                 }
         }
     ]).then((data) => {
+        // executes addDepartment method from db class
         db.addDepartment(data.departmentName)
             .then(() => {
+                // logs message once method is complete
                 console.log(`
                 `);
                 console.log("Department added to database");
                 console.log(`
                 `);
+                // prompts user again
                 promptUser();
             });
     });
-}
+};
 
+// function containing logic for removing a department from the database
 const deleteDepartment = () => {
 
+    // creates new array from departmentsArr
     const newDepartmentsArr = departmentsArr.slice();
+    // adds None value for user input to the array
     newDepartmentsArr.unshift({value: null, name: 'None'});
 
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'list',
@@ -372,17 +436,23 @@ const deleteDepartment = () => {
         }
     ])
     .then((data) => {
+        // executes delete function using department's id
         db.deleteDepartment(data.departmentID)
             .then(() => {
+                // checks if the value is anything other than null
                 if (data.departmentID != null) {
+                    // if above is true then message is displayed
                     console.log('Department removed from database');
                 }
+                // prompts user again
                 promptUser();
-            })
-    })
-}
+            });
+    });
+};
 
+// function containing logic for viewing the total utilized budget of a department
 const viewTotalUtilizedBudget = () => {
+    // inquirer prompts
     return inquirer.prompt([
         {
             type: 'list',
@@ -392,24 +462,31 @@ const viewTotalUtilizedBudget = () => {
         }
     ])
     .then((data) => {
+        // executes method from db class
         db.findTotalUtilizedBudget(data.departmentID)
             .then(([rows, fields]) => {
+                // logs data in a console.table
                 console.log(`
                 `);
                 console.table(rows);
                 console.log(`
                 `);
+                // prompts user again
                 promptUser();
             });
     });
-}
+};
 
+// function containing logic for updating arrays containing database data we require for prompts
 const updateArrays = () => {
 
+    // resets arrays each time the function is called
     employeeArr = [];
     rolesArr = [];
     departmentsArr = [];
     managerArr = [{value: null, name: 'No manager'}];
+
+    // executes methods which grab data from our database and pushes them into our arrays formatted for use in our inquirer prompts
 
     db.findAllEmployees()
     .then(([rows, fields]) => {
@@ -417,8 +494,8 @@ const updateArrays = () => {
             const { id, first_name, last_name } = el;
             const employee = { value: id, name: `${first_name} ${last_name}`};
             employeeArr.push(employee);
-        })
-    })
+        });
+    });
 
     db.findAllRolesRaw()
     .then(([rows, fields]) => {
@@ -426,8 +503,8 @@ const updateArrays = () => {
             const { id, title } = el;
             const role = { value: id, name: title };
             rolesArr.push(role);
-        })
-    })
+        });
+    });
 
     db.findAllManagers()
     .then(([rows, fields]) => {
@@ -435,8 +512,8 @@ const updateArrays = () => {
             const { id, first_name, last_name } = el;
             const manager = { value: id, name: `${first_name} ${last_name}`};
             managerArr.push(manager);
-        })
-    })
+        });
+    });
 
     db.findAllDepartments()
     .then(([rows, fields]) => {
@@ -444,12 +521,14 @@ const updateArrays = () => {
             const { id, name } = el;
             const department = { value: id, name: name };
             departmentsArr.push(department);
-        })
-    })
+        });
+    });
 
-}
+};
 
+// function containing logic for checking which option the user selected from the promptUser function
 const checkNav = (nav) => {
+    // switch statement which checks the nave value and executes the appropriate function 
     switch(nav) {
         case 0:
             db.findAllEmployees()
@@ -463,7 +542,7 @@ const checkNav = (nav) => {
                 })
                 .catch((err) => {
                     console.log(err);
-                })
+                });
             break;
         case 1: 
             viewByManager();
@@ -495,7 +574,7 @@ const checkNav = (nav) => {
                 })
                 .catch((err) => {
                     console.log(err);
-                })
+                });
             break;
         case 8:
             addRole();
@@ -513,6 +592,9 @@ const checkNav = (nav) => {
                     `);
                     promptUser();
                 })
+                .catch((err) => {
+                    console.log(err);
+                });
             break;
         case 11:
             addDepartment();
@@ -527,10 +609,13 @@ const checkNav = (nav) => {
             console.log(`
             `);
             console.log('Goodbye!');
+            // exits process
             process.exit(1);                
-    }
-}
+    };
+};
 
+// calls ascii function from utils/ascii.js
 ascii();
+// calls initial prompts to the user
 promptUser();
 

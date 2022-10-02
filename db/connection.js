@@ -1,5 +1,7 @@
+// imports
 const mysql = require('mysql2');
 
+// sets up mysql connection (change to your credentials)
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -7,4 +9,5 @@ const connection = mysql.createConnection({
     database: 'employees'
 });
 
+// exports connection
 module.exports = connection;

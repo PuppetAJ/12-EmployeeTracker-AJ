@@ -1,3 +1,5 @@
+-- adds data to tables
+
 INSERT INTO department (name)
 VALUES
     ('Engineering'),
