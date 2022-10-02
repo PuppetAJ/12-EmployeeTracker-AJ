@@ -23,4 +23,8 @@ const ascii =
 
 `
 
-console.log(ascii);
+const displayASCII = () => {
+    console.log(ascii);
+}
+
+module.exports = displayASCII;
