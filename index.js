@@ -6,10 +6,10 @@ const cTable = require('console.table');
 
 const db = new DB(connection);
 
-const employeeArr = [];
-const rolesArr = [];
-const managerArr = [{value: null, name: 'None'}];
-const departmentsArr = [];
+let employeeArr = [];
+let rolesArr = [];
+let departmentsArr = [];
+let managerArr = [{value: null, name: 'No manager'}];
 
 const promptUser = () => {
     updateArrays();
@@ -20,13 +20,20 @@ const promptUser = () => {
             message: 'What would you like to do?',
             choices: [
                 {value: 0, name: 'View all employees'},
-                {value: 1, name: 'Add Employee' },
-                {value: 2, name: 'Update Employee Role'},
-                {value: 3, name: 'View All Roles'},
-                {value: 4, name: 'Add Role'},
-                {value: 5, name: 'View All Departments'},
-                {value: 6, name: 'Add Department'},
-                {value: 7, name: 'Quit'}
+                {value: 1, name: 'View all employees by manager'},
+                {value: 2, name: 'View all employees by department'},
+                {value: 3, name: 'Add Employee' },
+                {value: 4, name: 'Delete employee'},
+                {value: 5, name: 'Update Employee Role'},
+                {value: 6, name: `Update Employee Manager`},
+                {value: 7, name: 'View All Roles'},
+                {value: 8, name: 'Add Role'},
+                {value: 9, name: 'Delete Role'},
+                {value: 10, name: 'View All Departments'},
+                {value: 11, name: 'Add Department'},
+                {value: 12, name: 'Delete Department'},
+                {value: 13, name: 'View Total Utilized Budget of a department'},
+                {value: 14, name: 'Quit'}
             ]
         },
     ]).then((data) => {
@@ -103,6 +110,55 @@ const addEmployee = () => {
     })
 }
 
+const viewByManager = () => {
+
+    const newManagerArr = managerArr.slice();
+    newManagerArr.shift();
+
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'managerID',
+            message: 'Which manager would you like to see the employees of?',
+            choices: newManagerArr   
+        }
+    ])
+    .then((data) => {
+        db.findAllEmployeesByManager(data.managerID)
+            .then(([rows, fields]) => {
+                console.log(`
+                `);
+                console.table(rows);
+                console.log(`
+                `);
+                promptUser();
+            })
+    })
+}
+
+const viewByDepartment = () => {
+    
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'departmentID',
+            message: 'Which department woudl you like to see the employees of?',
+            choices: departmentsArr
+        }
+    ])
+    .then((data) => {
+        db.findAllEmployeesByDepartment(data.departmentID)
+            .then(([rows, fields]) => {
+                console.log(`
+                `);
+                console.table(rows);
+                console.log(`
+                `);
+                promptUser();
+            })
+    })
+}
+
 const updateRole = () => {
 
     return inquirer.prompt([
@@ -131,6 +187,59 @@ const updateRole = () => {
                 promptUser();
             })
 
+    })
+}
+
+const updateManager = () => {
+
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employeeID',
+            message: 'Which employee\'s manager would you like to update?',
+            choices: employeeArr
+        },
+        {
+            type: 'list',
+            name: 'managerID',
+            message: 'Please select a manager',
+            choices: managerArr
+        }
+    ])
+    .then((data) => {
+        db.updateManager(data.employeeID, data.managerID)
+            .then(() => {
+                console.log(`
+                `);
+                console.log('Employee\'s manager updated in database');
+                console.log(`
+                `);
+                promptUser();
+            });
+    });
+};
+
+const deleteEmployee = () => {
+
+    const newEmployeeArr = employeeArr.slice();
+    newEmployeeArr.unshift({value: null, name: 'None'});
+
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employeeID',
+            message: 'Which employee would you like to remove?',
+            choices: newEmployeeArr
+        }
+    ])
+    .then((data) => {
+        db.deleteEmployee(data.employeeID)
+            .then(() => {
+                if (data.employeeID != null) {
+                    console.log('Employee removed from database');
+                }
+                promptUser();
+            })
     })
 }
 
@@ -189,6 +298,30 @@ const addRole = () => {
     })
 }
 
+const deleteRole = () => {
+
+    const newRolesArr = rolesArr.slice();
+    newRolesArr.unshift({value: null, name: 'None'});
+
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'roleID',
+            message: 'Which role would you like to remove?',
+            choices: newRolesArr
+        }
+    ])
+    .then((data) => {
+        db.deleteRole(data.roleID)
+            .then(() => {
+                if (data.roleID != null) {
+                    console.log('Role removed from database');
+                }
+                promptUser();
+            })
+    })
+}
+
 const addDepartment = () => {
 
     return inquirer.prompt([
@@ -225,7 +358,58 @@ const addDepartment = () => {
     });
 }
 
+const deleteDepartment = () => {
+
+    const newDepartmentsArr = departmentsArr.slice();
+    newDepartmentsArr.unshift({value: null, name: 'None'});
+
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'departmentID',
+            message: 'Which department would you like to remove?',
+            choices: newDepartmentsArr
+        }
+    ])
+    .then((data) => {
+        db.deleteDepartment(data.departmentID)
+            .then(() => {
+                if (data.departmentID != null) {
+                    console.log('Department removed from database');
+                }
+                promptUser();
+            })
+    })
+}
+
+const viewTotalUtilizedBudget = () => {
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'departmentID',
+            message: 'Which department would you like to view the budget of?',
+            choices: departmentsArr
+        }
+    ])
+    .then((data) => {
+        db.findTotalUtilizedBudget(data.departmentID)
+            .then(([rows, fields]) => {
+                console.log(`
+                `);
+                console.table(rows);
+                console.log(`
+                `);
+                promptUser();
+            });
+    });
+}
+
 const updateArrays = () => {
+
+    employeeArr = [];
+    rolesArr = [];
+    departmentsArr = [];
+    managerArr = [{value: null, name: 'No manager'}];
 
     db.findAllEmployees()
     .then(([rows, fields]) => {
@@ -281,13 +465,25 @@ const checkNav = (nav) => {
                     console.log(err);
                 })
             break;
-        case 1:
-            addEmployee();
+        case 1: 
+            viewByManager();
             break;
         case 2:
-            updateRole();
+            viewByDepartment();
             break;
         case 3:
+            addEmployee();
+            break;
+        case 4:
+            deleteEmployee();
+            break;
+        case 5:
+            updateRole();
+            break;
+        case 6:
+            updateManager();
+            break;
+        case 7:
             db.findAllRoles()
                 .then(([rows, fields]) => {
                     console.log(`
@@ -301,10 +497,13 @@ const checkNav = (nav) => {
                     console.log(err);
                 })
             break;
-        case 4:
+        case 8:
             addRole();
             break;
-        case 5:
+        case 9:
+            deleteRole();
+            break;
+        case 10:
             db.findAllDepartments()
                 .then(([rows, fields]) => {
                     console.log(`
@@ -315,18 +514,23 @@ const checkNav = (nav) => {
                     promptUser();
                 })
             break;
-        case 6:
+        case 11:
             addDepartment();
             break;
-        case 7:
+        case 12:
+            deleteDepartment();
+            break;
+        case 13:
+            viewTotalUtilizedBudget();
+            break;
+        case 14:
             console.log(`
             `);
             console.log('Goodbye!');
-            console.log(`
-            `);
             process.exit(1);                
     }
 }
 
+ascii();
 promptUser();
 
